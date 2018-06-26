@@ -145,9 +145,11 @@ resetRestaurants = (restaurants) => {
  * Create all restaurants HTML and add them to the webpage.
  */
 fillRestaurantsHTML = (restaurants = self.restaurants) => {
+  let tabIndex = 3;
   const ul = document.getElementById('restaurants-list');
   restaurants.forEach(restaurant => {
-    ul.append(createRestaurantHTML(restaurant));
+    ul.append(createRestaurantHTML(restaurant, tabIndex));
+    tabIndex++;
   });
   addMarkersToMap();
 }
@@ -155,12 +157,13 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 /**
  * Create restaurant HTML.
  */
-createRestaurantHTML = (restaurant) => {
+createRestaurantHTML = (restaurant, tabIndex) => {
   const li = document.createElement('li');
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.alt = restaurant.name + ' cover photo.'
   li.append(image);
 
   const name = document.createElement('h1');
@@ -177,6 +180,8 @@ createRestaurantHTML = (restaurant) => {
 
   const more = document.createElement('a');
   more.innerHTML = 'View Details';
+  more.setAttribute('aria-label', 'Show more details for ' + restaurant.name);
+  more.setAttribute('tabindex', tabIndex.toString());
   more.href = DBHelper.urlForRestaurant(restaurant);
   li.append(more)
 
@@ -198,6 +203,8 @@ addMarkersToMap = (restaurants = self.restaurants) => {
   });
 
 } 
+
+
 /* addMarkersToMap = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     // Add marker to the map
@@ -209,3 +216,14 @@ addMarkersToMap = (restaurants = self.restaurants) => {
   });
 } */
 
+if ('serviceWorker' in navigator) {
+
+  navigator.serviceWorker
+    .register('./service-worker.js', { scope: './' })
+    .then(function(registration){
+      console.log('Service Worker Registered');
+    })
+    .catch(function(err){
+      console.log('Service worker failed to register', err);
+    })
+}
