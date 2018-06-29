@@ -7,8 +7,7 @@ var cacheFiles = [
   './data/restaurants.json',
   './js/dbhelper.js',
   './js/main.js',
-  './js/restaurant_info.js',
-  './img/'
+  './js/restaurant_info.js'
 ]
 
 self.addEventListener('install', function(e){
@@ -39,6 +38,43 @@ self.addEventListener('activate', function(e){
   )
 })
 
+
 self.addEventListener('fetch', function(e){
-  console.log("[serviceWorker] Fetching", e.request.url);
-})
+  console.log("[serviceWorker] fetching", e.request.url);
+
+  e.respondWith(
+
+    caches.match(e.request).then(function(response) {
+
+      if ( response ) {
+
+        console.log("[ServiceWoker] Found in cache", e.request.url);
+        return response;
+      }
+
+      var requestClone = e.request.clone();
+
+       fetch(requestClone)
+        .then(function(response) {
+
+          if(!response) {
+            console.log("[ServiceWoker] No response from fetch")
+            return response;
+          }
+
+          var responseClone = response.clone();
+
+          caches.open(cacheName).then(function(cache) {
+
+            cache.put(e.request, responseClone);
+            return response;
+
+          })
+        })
+        
+        .catch(function(err) {
+            console.log("[ServiceWoker] Error when catching", err);
+        })
+    })
+  )
+});
